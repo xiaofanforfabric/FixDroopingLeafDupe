@@ -47,6 +47,7 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       matrix: ${{ steps.gen.outputs.matrix }}
+      count: ${{ steps.gen.outputs.count }}
     steps:
       - uses: actions/checkout@v4
 
@@ -57,7 +58,7 @@ jobs:
   # 3) 并行地对每个 (server, version) 组合下载服务端并验证插件可正常加载启动
   test:
     needs: [ build, matrix ]
-    if: ${{ needs.matrix.outputs.matrix != '' }}
+    if: ${{ needs.matrix.outputs.count != '' && needs.matrix.outputs.count != '0' }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     strategy:
@@ -85,5 +86,5 @@ jobs:
           PROJECT: ${{ matrix.project }}
           VERSION: ${{ matrix.version }}
           BUILD: ${{ matrix.build }}
-          FILE: ${{ matrix.file }}
+          SERVER_URL: ${{ matrix.url }}
         run: bash .github/scripts/run_server_test.sh

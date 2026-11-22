@@ -4,12 +4,11 @@ set -euo pipefail
 
 : "${PROJECT:?missing PROJECT}"
 : "${VERSION:?missing VERSION}"
-: "${BUILD:?missing BUILD}"
-: "${FILE:?missing FILE}"
+: "${SERVER_URL:?missing SERVER_URL}"
+BUILD="${BUILD:-0}"
 
 WORK="${RUNNER_TEMP:-/tmp}/srv-${PROJECT}-${VERSION}-${BUILD}"
 LOG="$WORK/server.log"
-URL="https://api.papermc.io/v2/projects/${PROJECT}/versions/${VERSION}/builds/${BUILD}/downloads/${FILE}"
 
 echo "== Node: $(uname -a) =="
 java -version 2>&1 || true
@@ -17,8 +16,8 @@ java -version 2>&1 || true
 mkdir -p "$WORK/plugins"
 cd "$WORK"
 
-echo "== Downloading server: $URL =="
-curl -fsSL --retry 3 -o server.jar "$URL"
+echo "== Downloading server: $SERVER_URL =="
+curl -fsSL --retry 3 -o server.jar "$SERVER_URL"
 
 # 放置插件
 PLUGIN_JAR="$(find "$GITHUB_WORKSPACE/plugin" -maxdepth 1 -name '*.jar' | head -n1)"
