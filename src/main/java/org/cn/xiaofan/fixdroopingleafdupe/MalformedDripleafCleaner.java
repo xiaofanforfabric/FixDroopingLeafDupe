@@ -140,7 +140,8 @@ public class MalformedDripleafCleaner {
         int baseX = chunkX << 4;
         int baseZ = chunkZ << 4;
 
-        for (int y = minY; y <= maxY; y++) {
+        // 注意：getMaxHeight() 是开区间（不含），有效 Y 为 [minY, maxY)
+        for (int y = minY; y < maxY; y++) {
             for (int x = 0; x < 16; x++) {
                 for (int z = 0; z < 16; z++) {
                     Material type = snapshot.getBlockType(x, y, z);
@@ -164,7 +165,7 @@ public class MalformedDripleafCleaner {
                                     || below.getHalf() != Bisected.Half.BOTTOM;
                         }
                     } else {
-                        if (y + 1 > maxY) {
+                        if (y + 1 >= maxY) {
                             malformed = true;
                         } else {
                             Material aboveType = snapshot.getBlockType(x, y + 1, z);
@@ -196,7 +197,8 @@ public class MalformedDripleafCleaner {
             Method max = World.class.getMethod("getMaxHeight");
             return new int[]{(int) min.invoke(world), (int) max.invoke(world)};
         } catch (Exception e) {
-            return new int[]{0, 255};
+            // 1.17 兜底：高度 0..255，开区间上界为 256
+            return new int[]{0, 256};
         }
     }
 
