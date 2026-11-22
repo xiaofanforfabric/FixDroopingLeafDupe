@@ -1,0 +1,89 @@
+name: CI
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # 1) 编译插件，产出 jar
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.7'
+
+      - name: Build
+        run: gradle build --no-daemon --stacktrace
+
+      - name: Upload plugin jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: plugin
+          path: build/libs/*.jar
+          if-no-files-found: error
+
+  # 2) 动态生成测试矩阵：从 PaperMC API 拉取 paper/folia 在 1.17 ~ 26.1.2 的所有稳定版本
+  matrix:
+    needs: build
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.gen.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Generate version matrix
+        id: gen
+        run: python3 .github/scripts/prepare_matrix.py
+
+  # 3) 并行地对每个 (server, version) 组合下载服务端并验证插件可正常加载启动
+  test:
+    needs: [ build, matrix ]
+    if: ${{ needs.matrix.outputs.matrix != '' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    strategy:
+      fail-fast: false
+      # 多线程并发执行（job 并行度）
+      max-parallel: 8
+      matrix: ${{ fromJson(needs.matrix.outputs.matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download plugin jar
+        uses: actions/download-artifact@v4
+        with:
+          name: plugin
+          path: plugin
+
+      - name: Setup Java ${{ matrix.java }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.java }}
+
+      - name: Run ${{ matrix.project }} ${{ matrix.version }} build ${{ matrix.build }} load test
+        env:
+          PROJECT: ${{ matrix.project }}
+          VERSION: ${{ matrix.version }}
+          BUILD: ${{ matrix.build }}
+          FILE: ${{ matrix.file }}
+        run: bash .github/scripts/run_server_test.sh
