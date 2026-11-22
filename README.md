@@ -1,5 +1,7 @@
 # FixDroopingLeafDupe
 
+中文 | [English](README_EN.md)
+
 一个用于修复 **小型垂滴叶复制（Dripleaf Universal Dupe）** 漏洞的 Paper 服务端插件。
 
 > 适用：Paper 及其分支（含 Folia），Minecraft **1.17 ~ 26.1.2**（漏洞受影响版本区间）。
