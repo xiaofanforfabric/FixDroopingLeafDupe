@@ -1,0 +1,22 @@
+# FixDroopingLeafDupe 配置文件
+#
+# 本插件用于缓解「小型垂滴叶复制（Dripleaf Universal Dupe）」漏洞：
+# 该漏洞利用畸形垂滴叶（上下半结构不完整）配合骨粉，使服务端
+# captureTreeGeneration 状态标记卡死，从而「破坏方块获得物品但方块不消失」实现复制。
+
+# 拦截对「畸形垂滴叶」使用骨粉，从根源上避免状态标记被卡住
+cancel-fertilize: true
+
+# 自动清除已经存在的畸形垂滴叶
+auto-clean:
+  enabled: true
+  # 定时扫描间隔（tick，20 tick = 1 秒）
+  interval-ticks: 100
+  # 每次定时扫描处理的已加载区块数量（越大越耗性能）
+  chunks-per-run: 4
+  # 区块加载时是否立即扫描一次该区块
+  on-chunk-load: true
+
+messages:
+  prefix: "&8[&c垂滴叶修复&8] &r"
+  fertilizer-cancelled: "&c检测到畸形垂滴叶，已拦截施肥并清除。"

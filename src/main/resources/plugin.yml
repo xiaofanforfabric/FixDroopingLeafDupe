@@ -1,0 +1,7 @@
+name: FixDroopingLeafDupe
+version: '${version}'
+main: org.cn.xiaofan.fixdroopingleafdupe.FixDroopingLeafDupe
+api-version: '1.17'
+folia-supported: true
+authors: [ xiaofan ]
+description: 修复paper系列服务器1.17-26.1.2的垂滴叶复制漏洞
