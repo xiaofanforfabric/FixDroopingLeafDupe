@@ -25,8 +25,10 @@ Paper 26.2 已在服务端源码的 `finally` 块中补上清理逻辑修复此�
 
 ## 修复策略
 
-- **拦截畸形叶施肥**：监听 `BlockFertilizeEvent`，若目标垂滴叶上下半结构不完整，
-  取消施肥并清除该畸形方块，从根源上避免 `captureTreeGeneration` 被卡死。
+- **拦截畸形叶施肥**：优先在 `PlayerInteractEvent`（手持骨粉右键方块）阶段拦截——部分版本
+  会在原版骨粉逻辑内部先抛异常、来不及触发 `BlockFertilizeEvent`；同时保留
+  `BlockFertilizeEvent` 作为兜底。命中畸形垂滴叶时取消交互并清除该方块，
+  从根源上避免 `captureTreeGeneration` 被卡死。
 - **自动清除畸形叶**：维护已加载区块集合，定时轮转扫描并清除畸形垂滴叶；区块加载时也会立即扫描。
 
 ---
