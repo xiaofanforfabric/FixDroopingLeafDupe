@@ -69,6 +69,16 @@ echo "===== server.log (tail 250) ====="
 tail -n 250 "$LOG" || true
 echo "================================="
 
+# 任一命中的「插件相关报错」即视为失败（插件出错通常会被服务端自动禁用而不会崩溃）
+ERROR_REGEX='ERROR\].*\[FixDroopingLeafDupe\]|SEVERE\].*\[FixDroopingLeafDupe\]|\[FixDroopingLeafDupe\].*(Exception|Error|Throwable)|Error occurred while (enabling|disabling) FixDroopingLeafDupe|Could not load .*FixDroopingLeafDupe|Failed to load .*FixDroopingLeafDupe|org\.cn\.xiaofan\.fixdroopingleafdupe|NoClassDefFoundError|NoSuchMethodError|NoSuchFieldError|ClassNotFoundException|AbstractMethodError|IncompatibleClassChangeError|UnsupportedClassVersionError|LinkageError|VerifyError|IllegalAccessError|ExceptionInInitializerError|Exception in thread'
+
+if grep -nE "$ERROR_REGEX" "$LOG" > "$WORK/errors.txt" 2>/dev/null; then
+  echo "RESULT: FAIL - plugin-related error detected on ${PROJECT} ${VERSION} (build ${BUILD})"
+  echo "----- matched lines -----"
+  cat "$WORK/errors.txt"
+  exit 1
+fi
+
 if grep -q 'FixDroopingLeafDupe 已启用' "$LOG"; then
   echo "RESULT: OK - plugin enabled on ${PROJECT} ${VERSION} (build ${BUILD})"
   exit 0
