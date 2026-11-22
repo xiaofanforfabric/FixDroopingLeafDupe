@@ -17,6 +17,5 @@ auto-clean:
   # 区块加载时是否立即扫描一次该区块
   on-chunk-load: true
 
-messages:
-  prefix: "&8[&c垂滴叶修复&8] &r"
-  fertilizer-cancelled: "&c检测到畸形垂滴叶，已拦截施肥并清除。"
+# 语言：对应插件目录下 lang/<language>.yml（内置 zh_cn、en_us）
+language: zh_cn
